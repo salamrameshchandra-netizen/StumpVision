@@ -18,6 +18,8 @@ interface OverWorkspaceProps {
   onSaveOver: () => void;
   selectedBallIndex: number | null;
   setSelectedBallIndex: (index: number | null) => void;
+  bowlers?: Bowler[];
+  onSelectBowler?: (id: string) => void;
 }
 
 export default function OverWorkspace({
@@ -30,6 +32,8 @@ export default function OverWorkspace({
   onSaveOver,
   selectedBallIndex,
   setSelectedBallIndex,
+  bowlers = [],
+  onSelectBowler,
 }: OverWorkspaceProps) {
   const [lineControl, setLineControl] = useState<number>(50);
   const [lengthControl, setLengthControl] = useState<PitchLength>('good_length');
@@ -90,23 +94,41 @@ export default function OverWorkspace({
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-5 flex flex-col h-full">
       {/* active Bowler Header */}
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
-        <div>
+        <div className="flex-1 min-w-0 pr-2">
           <h3 className="text-xs font-bold font-mono text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
             ACTIVE OVER ENGINE
           </h3>
-          <h2 className="text-lg font-bold text-slate-850 dark:text-slate-100 font-display tracking-tight mt-0.5">
-            {activeBowler ? activeBowler.name : 'Assign Bowler First'}
-          </h2>
-          {activeBowler && (
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              {activeBowler.hand} • {activeBowler.bowlingStyle}
-            </span>
+          {bowlers.length > 0 ? (
+            <div className="mt-1 flex flex-col gap-1">
+              <select
+                id="active-bowler-select"
+                value={activeBowler?.id || ''}
+                onChange={(e) => onSelectBowler?.(e.target.value)}
+                className="text-sm font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg py-1 px-2 text-slate-850 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer w-full max-w-[200px]"
+              >
+                <option value="" disabled>-- Select Bowler --</option>
+                {bowlers.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              {activeBowler && (
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block truncate max-w-[200px]" title={`${activeBowler.hand} • ${activeBowler.bowlingStyle}`}>
+                  {activeBowler.hand} • {activeBowler.bowlingStyle}
+                </span>
+              )}
+            </div>
+          ) : (
+            <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">
+              Assign Bowler First
+            </h2>
           )}
         </div>
 
         {activeBowler && (
-          <div className="text-right flex flex-col items-end">
-            <span className="text-xs font-bold text-slate-400 font-mono">DELIVERIES LOGGED</span>
+          <div className="text-right flex flex-col items-end shrink-0">
+            <span className="text-[10px] font-bold text-slate-400 font-mono">DELIVERIES LOGGED</span>
             <div className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono leading-none mt-1">
               {totalLegitimateBalls} / 6
               <span className="text-xs font-semibold text-slate-500 ml-1">

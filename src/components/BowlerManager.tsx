@@ -207,7 +207,7 @@ export default function BowlerManager({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-1.5">
                   {isSelected && (
                     <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-0.5">
                       <Check className="w-3.5 h-3.5" />
@@ -216,7 +216,10 @@ export default function BowlerManager({
                   )}
                   {onDeleteBowler && (
                     <button
-                      onClick={() => onDeleteBowler(bowler.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteBowler(bowler.id);
+                      }}
                       className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
                       title="De-register Bowler"
                     >

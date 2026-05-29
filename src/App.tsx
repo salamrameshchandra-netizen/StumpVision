@@ -434,6 +434,12 @@ export default function App() {
                 onSaveOver={handleSaveOver}
                 selectedBallIndex={selectedBallIndex}
                 setSelectedBallIndex={setSelectedBallIndex}
+                bowlers={bowlers}
+                onSelectBowler={(id) => {
+                  setSelectedBowlerId(id);
+                  setCurrentOverBalls([]); // clear current active over whenever template changes bowler
+                  setSelectedBallIndex(null);
+                }}
               />
             </div>
           </div>
@@ -446,6 +452,9 @@ export default function App() {
               onAddBowler={handleAddBowler}
               onSelectBowler={(id) => {
                 setSelectedBowlerId(id);
+                setCurrentOverBalls([]); // clear current active over whenever template changes bowler
+                setSelectedBallIndex(null);
+                setActiveTab('pitch_studio'); // auto-redirect to bowling pitch workflow
                 showToast(`Switched active training bowler to ${bowlers.find(b => b.id === id)?.name}`);
               }}
               selectedBowlerId={selectedBowlerId}
