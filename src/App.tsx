@@ -9,6 +9,7 @@ import PitchVisualizer from './components/PitchVisualizer';
 import OverWorkspace from './components/OverWorkspace';
 import BowlerManager from './components/BowlerManager';
 import Dashboard from './components/Dashboard';
+import OverEndModal from './components/OverEndModal';
 import { exportPitchingStatsPDF } from './utils/pdfExporter';
 import {
   Target,
@@ -165,6 +166,9 @@ export default function App() {
   const [currentOverBalls, setCurrentOverBalls] = useState<BallDetail[]>([]);
   const [selectedBallIndex, setSelectedBallIndex] = useState<number | null>(null);
 
+  // Modal prompt for ending over and rotating bowler (pops up on 6th ball or on end over)
+  const [showOverEndModal, setShowOverEndModal] = useState<boolean>(false);
+
   // Active bowling side: 'over_the_wicket' | 'around_the_wicket'
   const [currentBowlingSide, setCurrentBowlingSide] = useState<BowlingSide>('over_the_wicket');
 
@@ -248,7 +252,8 @@ export default function App() {
 
     // Check if over is already complete
     if (currentOverBalls.length >= 6) {
-      showToast('Maximum 6 balls already reached. Click "End Over" to conclude and record.', 'info');
+      setShowOverEndModal(true);
+      showToast('All 6 deliveries bowled! Choose the next bowler in the popup.', 'info');
       return;
     }
 
@@ -265,7 +270,14 @@ export default function App() {
       timestamp: new Date().toISOString(),
     };
 
-    setCurrentOverBalls((prev) => [...prev, newBall]);
+    setCurrentOverBalls((prev) => {
+      const updated = [...prev, newBall];
+      if (updated.length === 6) {
+        // Automatically pop up option after the 6th ball is bowled
+        setShowOverEndModal(true);
+      }
+      return updated;
+    });
     setSelectedBallIndex(nextBallIndex); // Focus editing workspace on this just plotted ball
   };
 
@@ -273,7 +285,8 @@ export default function App() {
     const nextBallIndex = currentOverBalls.length + 1;
 
     if (currentOverBalls.length >= 6) {
-      showToast('Maximum 6 balls already reached. Click "End Over" to conclude and record.', 'info');
+      setShowOverEndModal(true);
+      showToast('All 6 deliveries bowled! Choose the next bowler in the popup.', 'info');
       return;
     }
 
@@ -286,7 +299,14 @@ export default function App() {
       timestamp: new Date().toISOString(),
     };
 
-    setCurrentOverBalls((prev) => [...prev, newBall]);
+    setCurrentOverBalls((prev) => {
+      const updated = [...prev, newBall];
+      if (updated.length === 6) {
+        // Automatically pop up option after the 6th ball is bowled
+        setShowOverEndModal(true);
+      }
+      return updated;
+    });
     setSelectedBallIndex(nextBallIndex);
   };
 
@@ -299,7 +319,7 @@ export default function App() {
   const handleDeleteBall = (index: number) => {
     setCurrentOverBalls((prev) => {
       const filtered = prev.filter((b) => b.ballIndex !== index);
-      return filtered.map((b, idx) => {
+      const reindexed = filtered.map((b, idx) => {
         const sequentialIndex = idx + 1;
         return {
           ...b,
@@ -307,6 +327,10 @@ export default function App() {
           actualBallNumber: sequentialIndex,
         };
       });
+      if (reindexed.length < 6) {
+        setShowOverEndModal(false);
+      }
+      return reindexed;
     });
     setSelectedBallIndex(null);
   };
@@ -314,11 +338,21 @@ export default function App() {
   const handleClearOver = () => {
     setCurrentOverBalls([]);
     setSelectedBallIndex(null);
+    setShowOverEndModal(false);
     showToast('Active over records cleared.', 'info');
   };
 
-  // End and save the completed over
-  const handleSaveOver = () => {
+  // Open modal when user clicks End Over
+  const handleOpenEndOverModal = () => {
+    if (currentOverBalls.length === 0) {
+      showToast('No deliveries logged in this over yet.', 'info');
+      return;
+    }
+    setShowOverEndModal(true);
+  };
+
+  // End and save the completed over with selected next bowler
+  const handleEndOverWithBowler = (nextBowlerId?: string) => {
     if (!activeBowler) return;
     if (currentOverBalls.length === 0) return;
 
@@ -336,6 +370,26 @@ export default function App() {
     setCompletedOvers((prev) => [completedOver, ...prev]);
     setCurrentOverBalls([]); // Reset active logging pitch canvas
     setSelectedBallIndex(null);
+    setShowOverEndModal(false);
+
+    if (nextBowlerId) {
+      const targetBowler = bowlers.find((b) => b.id === nextBowlerId);
+      if (targetBowler) {
+        setSelectedBowlerId(targetBowler.id);
+        if (targetBowler.preferredBowlingSide) {
+          setCurrentBowlingSide(targetBowler.preferredBowlingSide);
+        }
+        if (targetBowler.id !== activeBowler.id) {
+          showToast(
+            `Over recorded for ${activeBowler.name}! Rotated to ${targetBowler.name} for the next over.`,
+            'success'
+          );
+        } else {
+          showToast(`Over concluded and recorded for ${activeBowler.name}! Ready for next over.`, 'success');
+        }
+        return;
+      }
+    }
 
     // Auto bowler alternation if multiple bowlers exist (e.g. 2 bowlers switching back and forth)
     if (bowlers.length > 1) {
@@ -544,7 +598,7 @@ export default function App() {
                 onUpdateBall={handleUpdateBall}
                 onDeleteBall={handleDeleteBall}
                 onClearOver={handleClearOver}
-                onSaveOver={handleSaveOver}
+                onSaveOver={handleOpenEndOverModal}
                 selectedBallIndex={selectedBallIndex}
                 setSelectedBallIndex={setSelectedBallIndex}
                 bowlers={bowlers}
@@ -588,6 +642,17 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Pop option modal for ending over and changing the bowler */}
+      <OverEndModal
+        isOpen={showOverEndModal}
+        onClose={() => setShowOverEndModal(false)}
+        activeBowler={activeBowler}
+        balls={currentOverBalls}
+        bowlers={bowlers}
+        onEndOver={handleEndOverWithBowler}
+        onAddBowler={handleAddBowler}
+      />
 
       {/* Footer Branding credits */}
       <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 mt-auto">

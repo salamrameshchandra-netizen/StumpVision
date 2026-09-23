@@ -268,20 +268,20 @@ export default function OverWorkspace({
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <div>
                   <div className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
-                    Over Completed ({totalLegitimateBalls}/6 Deliveries)
+                    Over Completed (6/6 Deliveries Bowled)
                   </div>
                   <div className="text-[11px] text-emerald-700 dark:text-emerald-400">
-                    All deliveries bowled. Click &apos;End Over&apos; to finish and record this over.
+                    6th ball bowled! End this over and rotate to the next bowler.
                   </div>
                 </div>
               </div>
               <button
                 id="btn-end-over-banner"
                 onClick={onSaveOver}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-md transition-all cursor-pointer animate-pulse"
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-md transition-all cursor-pointer animate-pulse"
               >
                 <Flag className="w-3.5 h-3.5" />
-                End Over
+                End Over &amp; Change Bowler
               </button>
             </div>
           )}
@@ -492,7 +492,7 @@ export default function OverWorkspace({
                 className="flex items-center justify-center gap-2 text-xs font-bold text-white py-2.5 px-6 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all shadow-md animate-pulse cursor-pointer"
               >
                 <Flag className="w-4 h-4 text-emerald-100" />
-                End Over ({totalLegitimateBalls}/6 Deliveries)
+                End Over &amp; Change Bowler (6/6 Deliveries)
               </button>
             ) : (
               <div className="flex items-center gap-2">
