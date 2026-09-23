@@ -172,17 +172,17 @@ export default function OverWorkspace({
               className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold flex items-center gap-1 cursor-pointer ml-auto"
             >
               <Plus className="w-3.5 h-3.5" />
-              {showQuickAdd ? 'Close' : 'Add Player'}
+              {showQuickAdd ? 'Close' : 'Add Bowler'}
             </button>
           )}
         </div>
 
-        {/* Inline Quick Add Player input with Save Player Name button */}
+        {/* Inline Quick Add Bowler input */}
         {showQuickAdd && (
           <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 rounded-xl flex flex-col sm:flex-row gap-2 items-center animate-fadeIn">
             <input
               type="text"
-              placeholder="Enter player's name..."
+              placeholder="Enter bowler's name..."
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
               onKeyDown={(e) => {
@@ -193,13 +193,13 @@ export default function OverWorkspace({
             />
             <button
               type="button"
-              id="btn-workspace-save-player-name"
+              id="btn-workspace-add-bowler"
               onClick={handleSavePlayerName}
               disabled={!newPlayerName.trim()}
               className="w-full sm:w-auto flex items-center justify-center gap-1.5 text-xs font-bold px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition disabled:opacity-50 cursor-pointer shrink-0"
             >
-              <Save className="w-3.5 h-3.5" />
-              Save Player Name
+              <Plus className="w-3.5 h-3.5" />
+              Add Bowler
             </button>
           </div>
         )}
