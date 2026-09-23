@@ -136,6 +136,34 @@ export function exportPitchingStatsPDF(
     currentY += 8;
   });
 
+  // --- Bowling Angle Breakdown Section (Over vs Around the Wicket) ---
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('BOWLING ANGLE BREAKDOWN', 15, currentY + 10);
+
+  doc.setFillColor(241, 245, 249);
+  doc.rect(15, currentY + 14, 180, 8, 'F');
+  doc.setFontSize(9);
+  doc.setTextColor(71, 85, 105);
+  doc.text('Bowling Angle', 18, currentY + 19);
+  doc.text('Deliveries Bowled', 100, currentY + 19);
+  doc.text('Percentage Tally', 150, currentY + 19);
+
+  let angleY = currentY + 22;
+  [
+    { name: 'Over the Wicket (OTW)', count: stats.otwBalls || 0, pct: stats.otwPercent || 0 },
+    { name: 'Around the Wicket (ATW)', count: stats.atwBalls || 0, pct: stats.atwPercent || 0 },
+  ].forEach((item) => {
+    doc.line(15, angleY + 6, 195, angleY + 6);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(darkSlate[0], darkSlate[1], darkSlate[2]);
+    doc.text(item.name, 18, angleY + 3.5);
+    doc.text(String(item.count), 100, angleY + 3.5);
+    doc.text(`${item.pct}%`, 150, angleY + 3.5);
+    angleY += 8;
+  });
+
   // --- Detailed Overs Table ---
   doc.addPage();
 
@@ -196,14 +224,13 @@ export function exportPitchingStatsPDF(
       if (id === 'short_pitch') return 'SHT';
       if (id === 'short_of_good') return 'BKL';
       if (id === 'good_length') return 'GD';
-      if (id === 'over_pitch') return 'OVP';
-      if (id === 'full_length') return 'FUL';
+      if (id === 'full_length' || id === 'over_pitch') return 'FUL';
       if (id === 'yorker') return 'YKR';
-      return '';
+      return 'FUL';
     };
 
     const ballString = ov.balls
-      .map((b) => getShorthand(b.pitchLength))
+      .map((b) => `${getShorthand(b.pitchLength)}[${b.bowlingSide === 'around_the_wicket' ? 'ATW' : 'OTW'}]`)
       .join(' ');
 
     const goodCountInOver = ov.balls.filter((b) => b.pitchLength === 'good_length' || b.pitchLength === 'yorker').length;
